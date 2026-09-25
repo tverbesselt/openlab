@@ -1,0 +1,398 @@
+rules_version = '2';
+
+// Firestore-regels.
+//
+// Uitgangspunten:
+//  - Cursisten oefenen zonder account. Eén oefening, map of sessie ophalen op id of code
+//    mag daarom zonder aanmelding. Wat je niet kan zonder aanmelding: lijsten opvragen.
+//  - Alleen leraren maken materiaal. Wie leraar is, staat in instellingen/app (toegang),
+//    dat de beheerder in de app instelt. Een beheerder is altijd leraar.
+//  - Wat cursisten insturen (stemmen, exit tickets, quizresultaten) is anoniem en beperkt
+//    in grootte, en alleen de leraar die het materiaal maakte, kan het lezen.
+//  - Wat een cursist over zijn eigen leren bijhoudt (gespreid herhalen), blijft van hem:
+//    niemand anders kan het lezen, ook de leraar niet.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function aangemeld() {
+      return request.auth != null;
+    }
+
+    // Alleen een geverifieerd adres telt; bij Google-accounts is dat altijd zo.
+    function email() {
+      return aangemeld()
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        ? request.auth.token.email.lower()
+        : '';
+    }
+
+    // Beheerders stellen de app in en ordenen het gedeelde materiaal in organisatiemappen.
+    // Wie beheerder is, staat in beheerders/{e-mail}; die lijst wijzig je alleen in de
+    // Firebase-console. Zo kan niemand zichzelf beheerder maken.
+    function isBeheerder() {
+      return email() != ''
+        && exists(/databases/$(database)/documents/beheerders/$(email()));
+    }
+
+    // De toegang uit het beheer: leraarDomeinen, cursistDomeinen en cursistPatroon.
+    // Zelfde logica als bepaalRol() in src/lib/auth/account.ts.
+    function toegang() {
+      return exists(/databases/$(database)/documents/instellingen/app)
+        ? get(/databases/$(database)/documents/instellingen/app).data.get('toegang', {})
+        : {};
+    }
+
+    function isLeraar() {
+      return isBeheerder() || (email() != '' && isLeraarVolgensToegang(toegang()));
+    }
+
+    function isLeraarVolgensToegang(t) {
+      let domein = email().split('@')[1];
+      let patroon = t.get('cursistPatroon', '');
+      return domein in t.get('leraarDomeinen', [])
+        && (patroon == '' || !email().matches(patroon));
+    }
+
+    function isEigenaar(data) {
+      return aangemeld() && data.creatorId == request.auth.uid;
+    }
+
+    function isOrganisatiemap(data) {
+      return data.get('organisatie', false) == true;
+    }
+
+    function tekst(waarde, max) {
+      return waarde is string && waarde.size() <= max;
+    }
+
+    function geldigMateriaal(data) {
+      return data.creatorId == request.auth.uid
+        && tekst(data.title, 200)
+        && data.visibility in ['prive', 'organisatie']
+        && tekst(data.shareCode, 12);
+    }
+
+    /* ── Oefeningen ──────────────────────────────────────────────────────── */
+
+    match /oefeningen/{id} {
+      // Wie de link of de code heeft, mag oefenen. Ook zonder account.
+      allow get: if true;
+      // Lijsten: alleen wat gedeeld is met de organisatie, of wat van jou is.
+      allow list: if resource.data.visibility == 'organisatie' || isEigenaar(resource.data);
+
+      allow create: if isLeraar() && geldigMateriaal(request.resource.data);
+      allow update: if isLeraar() && isEigenaar(resource.data)
+        && request.resource.data.creatorId == resource.data.creatorId
+        && geldigMateriaal(request.resource.data);
+      allow delete: if isLeraar() && isEigenaar(resource.data);
+
+      function maker() {
+        return get(/databases/$(database)/documents/oefeningen/$(id)).data;
+      }
+
+      // Exit tickets: iedereen mag er één insturen, alleen de maker leest ze.
+      match /inzendingen/{inzendingId} {
+        allow read: if isEigenaar(maker());
+        allow create: if request.resource.data.keys().hasOnly(['antwoorden', 'op'])
+          && request.resource.data.antwoorden is list
+          && request.resource.data.antwoorden.size() <= 10
+          && tekst(request.resource.data.op, 40);
+        allow update, delete: if false;
+      }
+
+      // Quizresultaten: welke vragen fout gingen, zonder wie het was. Zo ziet de leraar
+      // waar de klas struikelt, en blijft oefenen vrij van beoordeling.
+      match /resultaten/{resultaatId} {
+        allow read: if isEigenaar(maker());
+        allow create: if request.resource.data.keys().hasOnly(['foutVragen', 'aantalVragen', 'op'])
+          && request.resource.data.foutVragen is list
+          && request.resource.data.foutVragen.size() <= 100
+          && request.resource.data.aantalVragen is int
+          && request.resource.data.aantalVragen > 0
+          && request.resource.data.aantalVragen <= 100
+          && tekst(request.resource.data.op, 40);
+        allow update, delete: if false;
+      }
+    }
+
+    /* ── Mappen ──────────────────────────────────────────────────────────── */
+
+    // Een map is persoonlijk, of van de organisatie. Een persoonlijke map is van de leraar
+    // die ze maakte. Een organisatiemap ziet elke leraar; elke beheerder kan ze wijzigen,
+    // ook als een andere beheerder ze aanmaakte. Een map verandert nooit van soort.
+    match /mappen/{id} {
+      allow get: if true;
+      allow list: if isEigenaar(resource.data)
+        || (isLeraar() && isOrganisatiemap(resource.data));
+
+      allow create: if isLeraar()
+        && request.resource.data.creatorId == request.auth.uid
+        && tekst(request.resource.data.title, 200)
+        && tekst(request.resource.data.shareCode, 12)
+        && (!isOrganisatiemap(request.resource.data) || isBeheerder());
+
+      allow update: if isLeraar()
+        && request.resource.data.creatorId == resource.data.creatorId
+        && request.resource.data.shareCode == resource.data.shareCode
+        && isOrganisatiemap(request.resource.data) == isOrganisatiemap(resource.data)
+        && tekst(request.resource.data.title, 200)
+        && (isOrganisatiemap(resource.data) ? isBeheerder() : isEigenaar(resource.data));
+
+      allow delete: if isLeraar()
+        && (isOrganisatiemap(resource.data) ? isBeheerder() : isEigenaar(resource.data));
+    }
+
+    /* ── Beheerders: alleen je eigen vermelding lezen, nooit schrijven ───── */
+
+    match /beheerders/{adres} {
+      allow get: if email() != '' && adres == email();
+      allow list, write: if false;
+    }
+
+    /* ── Instellingen: iedereen leest, alleen een beheerder schrijft ─────── */
+
+    // Naam, logo, kleur, talen, werkvormen, tips en toegang. Iedereen moet ze kunnen lezen,
+    // ook wie niet aangemeld is: anders weet de app niet in welke taal ze moet spreken.
+    match /instellingen/{id} {
+      allow get: if id == 'app';
+      allow list: if false;
+      allow create, update: if id == 'app' && isBeheerder()
+        && request.resource.data.keys().hasOnly(
+             ['naam', 'organisatie', 'logo', 'kleur', 'talen', 'standaardTaal', 'uit', 'tips', 'toegang'])
+        && tekst(request.resource.data.naam, 40)
+        && tekst(request.resource.data.organisatie, 80)
+        && (request.resource.data.logo == null
+            || (tekst(request.resource.data.logo, 200000)
+                && request.resource.data.logo.matches('data:image/(webp|png|jpeg);base64,[A-Za-z0-9+/=]+')))
+        && tekst(request.resource.data.kleur, 7)
+        && request.resource.data.talen is list
+        && request.resource.data.talen.size() >= 1
+        && request.resource.data.talen.hasOnly(['nl', 'en', 'fr', 'es'])
+        && request.resource.data.standaardTaal in request.resource.data.talen
+        && request.resource.data.uit is list
+        && request.resource.data.uit.size() <= 60
+        && request.resource.data.tips is map
+        && request.resource.data.toegang is map
+        && request.resource.data.toegang.leraarDomeinen is list
+        && request.resource.data.toegang.cursistDomeinen is list
+        && tekst(request.resource.data.toegang.cursistPatroon, 200);
+      allow delete: if false;
+    }
+
+    /* ── Codes: van zes tekens naar een oefening of map ──────────────────── */
+
+    match /codes/{code} {
+      allow get: if true;
+      allow list: if false;
+      // Een code die al bestaat, kan je niet overnemen: create faalt dan vanzelf.
+      allow create: if isLeraar()
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.soort in ['oefening', 'map']
+        && tekst(request.resource.data.doelId, 100)
+        && (!isOrganisatiemap(request.resource.data)
+            || (request.resource.data.soort == 'map' && isBeheerder()));
+      allow update: if false;
+      // De code van een organisatiemap ruimt elke beheerder op, niet alleen wie ze maakte.
+      allow delete: if isLeraar()
+        && (isEigenaar(resource.data) || (isOrganisatiemap(resource.data) && isBeheerder()));
+    }
+
+    /* ── Live-sessies ────────────────────────────────────────────────────── */
+
+    match /sessies/{code} {
+      // Cursisten volgen de sessie via de pincode; die kennen ze van het digibord.
+      allow get: if true;
+      allow list: if false;
+      allow create: if isLeraar()
+        && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.type in ['poll', 'wordcloud', 'snellevraag', 'begripsmeter', 'quiz', 'bord']
+        && request.resource.data.status in ['actief', 'afgesloten']
+        && tekst(request.resource.data.vraag, 500);
+      allow update: if isLeraar() && resource.data.hostId == request.auth.uid
+        && request.resource.data.hostId == resource.data.hostId;
+      allow delete: if isLeraar() && resource.data.hostId == request.auth.uid;
+
+      function sessie() {
+        return get(/databases/$(database)/documents/sessies/$(code)).data;
+      }
+
+      match /antwoorden/{apparaat} {
+        function geldigAntwoord() {
+          return sessie().status == 'actief'
+            && request.resource.data.apparaat == apparaat
+            && request.resource.data.keys().hasOnly(['apparaat', 'optie', 'woord', 'op'])
+            && (!('optie' in request.resource.data)
+                || (request.resource.data.optie is int
+                    && request.resource.data.optie >= 0
+                    && request.resource.data.optie < sessie().opties.size()))
+            && (!('woord' in request.resource.data) || tekst(request.resource.data.woord, 60))
+            && tekst(request.resource.data.op, 40);
+        }
+
+        // Alleen de leraar die projecteert, ziet de antwoorden.
+        allow read: if aangemeld() && sessie().hostId == request.auth.uid;
+        // Eén antwoord per toestel, alleen zolang de sessie loopt.
+        allow create: if geldigAntwoord();
+        // De begripsmeter is een doorlopend signaal: wie weer mee is, mag zijn kleur
+        // bijstellen. Bij een stemming blijft één stem één stem.
+        allow update: if sessie().type == 'begripsmeter' && geldigAntwoord();
+        allow delete: if false;
+      }
+
+      function isHost() {
+        return aangemeld() && sessie().hostId == request.auth.uid;
+      }
+
+      // Quizwedstrijd: wie meedoet, onder een bijnaam. Een toestel meldt zich één keer aan;
+      // punten, reeks en plaats schrijft alleen het bord van de leraar. Elk toestel leest zijn
+      // eigen stand op id, maar niemand behalve de host krijgt de lijst.
+      match /spelers/{apparaat} {
+        allow get: if true;
+        allow list: if isHost();
+        allow create: if isHost()
+          || (sessie().type == 'quiz'
+              && sessie().status == 'actief'
+              && request.resource.data.keys().hasOnly(['apparaat', 'bijnaam', 'op', 'team'])
+              && request.resource.data.apparaat == apparaat
+              && request.resource.data.bijnaam is string
+              && request.resource.data.bijnaam.size() >= 1
+              && request.resource.data.bijnaam.size() <= 20
+              // Een team kiest de cursist zelf bij het binnenkomen; het bord kan de teams
+              // daarna nog gelijk verdelen.
+              && (!('team' in request.resource.data)
+                  || (request.resource.data.team is int
+                      && request.resource.data.team >= 0
+                      && request.resource.data.team < sessie().quiz.instellingen.teams))
+              && tekst(request.resource.data.op, 40));
+        allow update, delete: if isHost();
+      }
+
+      // Quizwedstrijd: één antwoord per toestel en per vraag, alleen zolang die vraag loopt.
+      match /quizantwoorden/{antwoordId} {
+        function geldigQuizAntwoord() {
+          let d = request.resource.data;
+          let q = sessie().quiz;
+          return sessie().type == 'quiz'
+            && sessie().status == 'actief'
+            && q.fase == 'vraag'
+            && d.keys().hasOnly(['apparaat', 'vraagNr', 'keuze', 'tekst', 'op'])
+            && d.vraagNr is int
+            && d.vraagNr == q.vraagNr
+            && tekst(d.apparaat, 100)
+            && antwoordId == d.apparaat + '_' + string(d.vraagNr)
+            && exists(/databases/$(database)/documents/sessies/$(code)/spelers/$(d.apparaat))
+            // Kiezen uit de opties, of het antwoord intypen: één van de twee, niet allebei.
+            && (('keuze' in d) != ('tekst' in d))
+            && (!('keuze' in d)
+                || (d.keuze is list
+                    && d.keuze.size() >= 1
+                    && d.keuze.size() <= q.vraag.opties.size()))
+            && (!('tekst' in d) || (tekst(d.tekst, 100) && d.tekst.size() >= 1))
+            && tekst(d.op, 40);
+        }
+
+        allow read: if isHost();
+        allow create: if geldigQuizAntwoord();
+        allow update, delete: if false;
+      }
+
+      // Whiteboard: kaartjes van leraar en cursisten. Een foto, tekening of opname staat als
+      // data-URL in het document zelf, verkleind in de browser, zodat een cursist zonder
+      // account niets naar de opslag hoeft te uploaden. Wat de leraar niet toelaat, komt er
+      // niet op: de soort, de lengte van de tekst en de kolom worden hier nagekeken.
+      match /bord/{itemId} {
+        function geldigeInhoud(d, maxTekst) {
+          return d.id == itemId
+            && tekst(d.apparaat, 100)
+            && d.soort in ['tekst', 'afbeelding', 'tekening', 'video', 'audio']
+            && d.status in ['wacht', 'zichtbaar']
+            && (!('auteur' in d) || tekst(d.auteur, 100))
+            && (!('tekst' in d) || tekst(d.tekst, maxTekst))
+            && (!('alt' in d) || tekst(d.alt, 200))
+            && (d.soort == 'tekst'
+                ? ('tekst' in d) && d.tekst.size() >= 1 && !('url' in d)
+                : ('url' in d) && geldigeUrl(d.soort, d.url))
+            && tekst(d.op, 40);
+        }
+
+        // Alleen een filmpje van YouTube of Vimeo, en alleen foto's en audio, nooit SVG of
+        // iets anders waar code in kan zitten.
+        function geldigeUrl(soort, url) {
+          return soort == 'video'
+            ? tekst(url, 300)
+              && url.matches('https://(www[.]youtube[.]com/watch[?]v=[A-Za-z0-9_-]{11}(&t=[0-9]+)?|vimeo[.]com/[0-9]+([?]t=[0-9]+)?)')
+            : tekst(url, 900000)
+              && (soort == 'audio'
+                  ? url.matches('data:audio/[a-z0-9.+-]+(;[a-z0-9=.+-]+)*;base64,[A-Za-z0-9+/=]+')
+                  : url.matches('data:image/(webp|jpeg|png);base64,[A-Za-z0-9+/=]+'));
+        }
+
+        function geldigeKolom(d, kolommen) {
+          return !('kolom' in d)
+            || (d.kolom is int && d.kolom >= 0 && d.kolom < kolommen.size());
+        }
+
+        // De leraar ziet alles; een cursist alleen wat zichtbaar is, en alleen als de
+        // leraar het bord op de toestellen toont. Een lijst vraagt daarom op status.
+        allow read: if isHost()
+          || (sessie().type == 'bord'
+              && sessie().bord.zichtbaar == true
+              && resource.data.status == 'zichtbaar');
+
+        allow create: if isHost()
+          ? sessie().type == 'bord'
+            && request.resource.data.keys().hasOnly(
+                 ['id', 'apparaat', 'auteur', 'leraar', 'soort', 'tekst', 'url', 'alt', 'kolom', 'status', 'vast', 'op'])
+            && geldigeInhoud(request.resource.data, 1000)
+            && geldigeKolom(request.resource.data, sessie().bord.kolommen)
+          : sessie().type == 'bord'
+            && sessie().status == 'actief'
+            && sessie().bord.open == true
+            && request.resource.data.keys().hasOnly(
+                 ['id', 'apparaat', 'auteur', 'soort', 'tekst', 'url', 'alt', 'kolom', 'status', 'op'])
+            && request.resource.data.soort in sessie().bord.soorten
+            && request.resource.data.status == (sessie().bord.nakijken == true ? 'wacht' : 'zichtbaar')
+            && geldigeInhoud(
+                 request.resource.data,
+                 sessie().bord.maxTekens > 0 && sessie().bord.maxTekens < 1000 ? sessie().bord.maxTekens : 1000)
+            && geldigeKolom(request.resource.data, sessie().bord.kolommen);
+
+        // Goedkeuren, vastpinnen, verplaatsen en weghalen doet alleen de leraar. De inhoud
+        // zelf verandert niet.
+        // Een kaartje in een kolom die intussen verdween, blijft goed te keuren.
+        allow update: if isHost()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'vast', 'kolom'])
+          && request.resource.data.status in ['wacht', 'zichtbaar']
+          && (!('vast' in request.resource.data) || request.resource.data.vast is bool)
+          && (!('kolom' in request.resource.data.diff(resource.data).affectedKeys())
+              || geldigeKolom(request.resource.data, sessie().bord.kolommen));
+        allow delete: if isHost();
+      }
+    }
+
+    /* ── Gespreid herhalen: van de cursist, voor de cursist ──────────────── */
+
+    match /herhalingen/{gebruiker}/items/{itemId} {
+      allow read, delete: if aangemeld() && request.auth.uid == gebruiker;
+      allow create, update: if aangemeld()
+        && request.auth.uid == gebruiker
+        && request.resource.data.keys().hasOnly(
+             ['id', 'oefeningId', 'kaartId', 'doos', 'volgende', 'bijgewerkt'])
+        && tekst(request.resource.data.oefeningId, 100)
+        && tekst(request.resource.data.kaartId, 100)
+        && request.resource.data.doos is int
+        && request.resource.data.doos >= 0
+        && request.resource.data.doos <= 5
+        && tekst(request.resource.data.volgende, 10)
+        && tekst(request.resource.data.bijgewerkt, 40);
+    }
+
+    /* ── Al de rest: dicht ───────────────────────────────────────────────── */
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

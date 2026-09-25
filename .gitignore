@@ -1,0 +1,25 @@
+node_modules/
+.next/
+out/
+build/
+
+# Omgevingsvariabelen: nooit in de repo (zie .env.example voor de sleutels)
+.env
+.env.local
+.env*.local
+
+# Service-account-sleutels horen in Secret Manager, niet hier
+*serviceaccount*.json
+*service-account*.json
+
+.DS_Store
+*.log
+
+# Build-artefact van TypeScript
+*.tsbuildinfo
+
+# Lokale instellingen van Claude Code
+.claude/
+
+# Vercel
+.vercel

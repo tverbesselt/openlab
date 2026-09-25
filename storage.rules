@@ -1,0 +1,52 @@
+rules_version = '2';
+
+// Storage-regels: de foto's en audiofragmenten bij quizvragen.
+//
+// Uitgangspunten, dezelfde als in firestore.rules:
+//  - Cursisten oefenen zonder account, dus één bestand ophalen mag iedereen. Lijsten
+//    opvragen niet.
+//  - Alleen leraren uploaden, en alleen in hun eigen map. Wie leraar is, lezen deze regels
+//    uit Firestore (beheerders/ en instellingen/app). Dat werkt met de standaarddatabank.
+//  - Geen SVG of andere formaten waar code in kan zitten: alleen foto's en audio.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function email() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        ? request.auth.token.email.lower()
+        : '';
+    }
+
+    function isLeraar() {
+      return email() != ''
+        && (firestore.exists(/databases/(default)/documents/beheerders/$(email()))
+            || isLeraarVolgensToegang(
+                 firestore.get(/databases/(default)/documents/instellingen/app).data.get('toegang', {})));
+    }
+
+    function isLeraarVolgensToegang(t) {
+      let patroon = t.get('cursistPatroon', '');
+      return email().split('@')[1] in t.get('leraarDomeinen', [])
+        && (patroon == '' || !email().matches(patroon));
+    }
+
+    match /media/{eigenaar}/{bestand} {
+      allow get: if true;
+      allow list: if false;
+
+      allow create: if isLeraar()
+        && request.auth.uid == eigenaar
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|gif)|audio/.*');
+      allow update: if false;
+      allow delete: if isLeraar() && request.auth.uid == eigenaar;
+    }
+
+    match /{alles=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Basisstijl: rust, overzicht, weinig cognitieve belasting, goed leesbaar en
+   royale witruimte.
+
+   De merkkleur komt uit het beheer. src/lib/instellingen/kleur.ts rekent er een
+   volledige schaal uit en zet die als --merk-50 tot --merk-900 op <html>. Wat
+   hieronder in :root staat, is de standaard voor wie nog niets instelde.
+   ───────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-merk: var(--merk-500);
+  --color-merk-900: var(--merk-900);
+  /* Vlak achter witte tekst (knoppen, actieve keuzes): haalt altijd minstens 4,5:1. */
+  --color-merk-800: var(--merk-800);
+  --color-merk-700: var(--merk-700);
+  --color-merk-600: var(--merk-600);
+  --color-merk-400: var(--merk-400);
+  --color-merk-300: var(--merk-300);
+  --color-merk-50: var(--merk-50);
+  --color-grijs: #565657;
+  --color-grijs-700: #334155;
+  --color-grijs-500: #64748b;
+  --color-grijs-300: #cbd5e1;
+  --color-grijs-100: #f8fafc;
+  /* Rand van invoervelden: 3,5:1 op wit, zodat je ziet waar je kunt typen. */
+  --color-veldrand: #7c8ba0;
+
+  --font-sans: var(--font-app), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, sans-serif;
+}
+
+:root {
+  --merk-50: #eef3fd;
+  --merk-300: #9ab9f0;
+  --merk-400: #598ce4;
+  --merk-500: #2f6fde;
+  --merk-600: #2a64c8;
+  --merk-700: #2659b2;
+  --merk-800: #1e478e;
+  --merk-900: #183a74;
+  --achtergrond: color-mix(in srgb, var(--merk-50) 45%, #ffffff);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Rustige, schone achtergrond zonder afleidende korrel of felle bollen */
+body {
+  position: relative;
+  min-height: 100dvh;
+  color: #334155;
+  font-family: var(--font-sans);
+  background-color: var(--achtergrond);
+}
+
+:focus-visible {
+  outline: 2px solid var(--merk-500);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--merk-500) 18%, transparent);
+}
+
+/* ── Beweging & Subtiele Animaties ─────────────────────────────────────── */
+/*
+ * Let op de vulmodus 'backwards' bij de klassen hieronder, niet 'both'.
+ *
+ * Met 'both' houdt de browser de eindwaarde van de animatie vast. Ook een
+ * transform die niets doet, blijft dan als matrix op het element staan, en dan
+ * wordt dat element het referentiekader voor alles wat erin op position: fixed
+ * staat. Elk venster hing daardoor aan de pagina-inhoud in plaats van aan het
+ * scherm: scrollen schoof de sluitknop mee naar buiten.
+ *
+ * Met 'backwards' geldt de beginstand alleen vóór de animatie, en valt het
+ * element daarna terug op zijn gewone stijl, dus zonder transform.
+ */
+@keyframes u-kf-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes u-kf-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes u-kf-pop {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.u-fade {
+  animation: u-kf-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.u-rise {
+  animation: u-kf-rise 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.u-pop {
+  animation: u-kf-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* ── Schone Oppervlakken (Clean Cards & Cards) ─────────────────────────── */
+.u-card {
+  background-color: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--merk-500) 18%, transparent);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.u-card-hover:hover {
+  border-color: color-mix(in srgb, var(--merk-500) 45%, transparent);
+  box-shadow: 0 4px 12px -2px color-mix(in srgb, var(--merk-900) 8%, transparent);
+  transform: translateY(-2px);
+}
+
+/* Vlak in de merkkleur achter witte tekst. Tint 800 haalt altijd 4,5:1 met wit. */
+.u-teal-gradient {
+  background: linear-gradient(135deg, var(--merk-900) 0%, var(--merk-800) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .u-fade,
+  .u-rise,
+  .u-pop {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ── Weergave-instellingen (Universal Design for Learning) ──────────────────
+   De cursist kiest zelf grotere tekst, meer contrast of meer leesruimte. De keuze
+   staat als attribuut op <html>; zie src/components/Weergave.tsx.
+   Alles hangt aan de wortelgrootte, dus één regel schaalt de hele app mee. */
+
+html[data-tekst="groot"] {
+  font-size: 18px;
+}
+
+html[data-tekst="extra"] {
+  font-size: 21px;
+}
+
+/* Hoog contrast: gedempte grijzen worden donkerder en lijnen duidelijker.
+   !important is hier op zijn plaats: dit hoort de hulpklassen te overrulen. */
+html[data-contrast="hoog"] {
+  --achtergrond: #ffffff;
+}
+
+html[data-contrast="hoog"] body {
+  color: #0b1220;
+}
+
+html[data-contrast="hoog"] .text-slate-400,
+html[data-contrast="hoog"] .text-slate-500,
+html[data-contrast="hoog"] .text-slate-600 {
+  color: #334155 !important;
+}
+
+html[data-contrast="hoog"] .border-slate-100,
+html[data-contrast="hoog"] .border-slate-200 {
+  border-color: #8496ab !important;
+}
+
+html[data-contrast="hoog"] .placeholder-slate-300::placeholder,
+html[data-contrast="hoog"] .placeholder-slate-400::placeholder {
+  color: #475569 !important;
+}
+
+/* Ruimer lezen: meer lucht tussen regels, letters en woorden. Dat maakt het
+   woordbeeld rustiger, wat vooral bij dyslexie scheelt. */
+html[data-lezen="ruim"] body {
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  word-spacing: 0.08em;
+}
+
+html[data-lezen="ruim"] p,
+html[data-lezen="ruim"] li {
+  max-width: 62ch;
+}
+
+/* ── Afdrukken ─────────────────────────────────────────────────────────────
+   Wat op papier moet, komt uit /afdrukken. Daar staat alles in zwart-wit, zonder
+   kaders die inkt kosten, en zonder navigatie. */
+@media print {
+  .niet-afdrukken {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .afdruk-blad {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .afdruk-nieuwe-pagina {
+    break-before: page;
+    page-break-before: always;
+  }
+}

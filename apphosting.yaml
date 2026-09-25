@@ -1,0 +1,28 @@
+# Firebase App Hosting: build- en runtimeconfiguratie.
+# Geen geheimen nodig: de app praat vanuit de browser met Firestore; de bescherming zit in
+# firestore.rules. Vul de waarden in uit de Firebase-console (Projectinstellingen > Je apps).
+# Zie docs/en/setup.md (Nederlands: docs/nl/INSTALLEREN.md).
+
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: your-api-key
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: your-project-id.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: your-project-id
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:000000000000:web:0000000000000000000000"
+    availability: [BUILD, RUNTIME]
+  # Bucket voor foto's en audio bij quizvragen (regels in storage.rules). Leeg = uitschakelen.
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: your-project-id.firebasestorage.app
+    availability: [BUILD, RUNTIME]
