@@ -4,9 +4,9 @@
 onderzoek zegt over leren.** Beschikbaar in het Nederlands, Engels, Frans en Spaans. Gratis
 en open source (MIT).
 
-**▶ Probeer de demo: [DEMO_URL](DEMO_URL)**. Je hebt geen account nodig. Kies op de
-aanmeldpagina *Bekijk als leraar* om oefeningen te maken en de beheerpagina te openen. Zet de
-taal bovenaan op Nederlands.
+**▶ Probeer de demo: [openlab-ten.vercel.app](https://openlab-ten.vercel.app)**. Je hebt geen account nodig. Kies op de
+aanmeldpagina *Bekijk als leraar* om oefeningen te maken en de beheerpagina te openen. De demo
+start in het Engels: kies bovenaan *NL · Nederlands*.
 
 [English](README.md) · [Installeren](docs/nl/INSTALLEREN.md) · [Beheer](docs/nl/BEHEER.md) ·
 [Vertalen](docs/nl/VERTALEN.md) · [Wetenschappelijke basis](docs/nl/WETENSCHAPPELIJKE_BASIS.md)

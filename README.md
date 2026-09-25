@@ -3,7 +3,7 @@
 **Research-based digital learning activities, live classroom tools and practice, for teachers
 and learners.** Available in English, Dutch, French and Spanish. Free and open source (MIT).
 
-**▶ Try the demo: [DEMO_URL](DEMO_URL)**, no account needed. Choose *View as teacher* on the
+**▶ Try the demo: [openlab-ten.vercel.app](https://openlab-ten.vercel.app)**, no account needed. Choose *View as teacher* on the
 sign-in page to create exercises and open the Administration page.
 
 [Nederlands](README.nl.md) · [Setup](docs/en/setup.md) · [Administration](docs/en/administration.md) ·

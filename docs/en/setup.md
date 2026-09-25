@@ -41,6 +41,7 @@ Copy `.env.example` to `.env.local` and fill in:
 | `NEXT_PUBLIC_FIREBASE_APP_ID` | yes | Web app id |
 | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | no | Bucket name for quiz media |
 | `NEXT_PUBLIC_FIRESTORE_DATABASE` | no | Named Firestore database; empty = default |
+| `NEXT_PUBLIC_DEFAULT_LANGUAGE` | no | `nl`, `en`, `fr` or `es`: default language until an administrator saves settings (default `nl`) |
 | `NEXT_PUBLIC_FIRESTORE_EMULATOR` | no | `host:port` of a local emulator, for testing only |
 
 These values are public by design; security comes from the rules files.
@@ -77,6 +78,9 @@ The app (`src/lib/auth/account.ts`) and the rules (`firestore.rules`, `storage.r
 exactly the same logic.
 
 ## 7. Host it
+
+The public demo, <https://openlab-ten.vercel.app>, is this repository on Vercel without any
+Firebase variables, with `NEXT_PUBLIC_DEFAULT_LANGUAGE=en`.
 
 Any Next.js host works.
 

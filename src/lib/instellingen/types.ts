@@ -53,7 +53,8 @@ export const STANDAARD_INSTELLINGEN: Instellingen = {
   logo: null,
   kleur: STANDAARD_KLEUR,
   talen: [...ALLE_TALEN],
-  standaardTaal: "nl",
+  // Tot een beheerder iets bewaart. De publieke demo zet hier Engels.
+  standaardTaal: isTaal(process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE) ? process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE : "nl",
   uit: [],
   tips: { cursisten: true, leraren: true },
   toegang: { leraarDomeinen: [], cursistDomeinen: [], cursistPatroon: "" },
