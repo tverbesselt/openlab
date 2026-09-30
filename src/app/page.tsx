@@ -63,6 +63,7 @@ const LESHULP_FUNCTIE: Record<string, FunctieId> = {
   groups: "groupmaker",
   opfrissen: "opfrissen",
   digibord: "digibord",
+  audiotekst: "audiotekst",
 };
 
 function LeraarStart({

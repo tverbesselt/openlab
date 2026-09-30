@@ -17,13 +17,15 @@ export type ExtraFunctie =
   | "opfrissen"
   | "digibord"
   | "herhalen"
-  | "afdrukken";
+  | "afdrukken"
+  | "inlezen"
+  | "audiotekst";
 
 export type FunctieId = ExerciseType | ExtraFunctie;
 
 export interface Functiegroep {
   /** Naam in de vertaling: beheer.groepen.<id>. */
-  id: "inoefenen" | "controleren" | "activeren" | "live" | "klastools" | "cursist";
+  id: "inoefenen" | "controleren" | "activeren" | "live" | "klastools" | "cursist" | "spraak";
   functies: FunctieId[];
 }
 
@@ -47,6 +49,8 @@ export const FUNCTIEGROEPEN: Functiegroep[] = [
   { id: "live", functies: ["snellevraag", "begripsmeter", "wedstrijd", "bord"] },
   { id: "klastools", functies: ["timer", "randomizer", "groupmaker", "opfrissen", "digibord"] },
   { id: "cursist", functies: ["herhalen", "afdrukken"] },
+  // Werkt pas met een sleutel van OpenAI (Beheer > Spraak). Zonder sleutel blijven de knoppen weg.
+  { id: "spraak", functies: ["inlezen", "audiotekst"] },
 ];
 
 export const ALLE_FUNCTIES: FunctieId[] = FUNCTIEGROEPEN.flatMap((g) => g.functies);
@@ -62,6 +66,8 @@ export function isExtraFunctie(id: FunctieId): id is ExtraFunctie {
     "digibord",
     "herhalen",
     "afdrukken",
+    "inlezen",
+    "audiotekst",
   ].includes(id);
 }
 

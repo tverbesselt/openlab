@@ -11,6 +11,7 @@ import {
   Lightbulb,
   LayoutGrid,
   Lock,
+  Mic,
   Palette,
   Trash2,
 } from "lucide-react";
@@ -25,7 +26,9 @@ import {
   type FunctieId,
 } from "@/lib/instellingen/functies";
 import { KLEURSCHEMAS, contrast, isHex, maakPalet, type Tint } from "@/lib/instellingen/kleur";
-import { firebaseConfigured } from "@/lib/firebase/client";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { firebaseConfigured, getDb } from "@/lib/firebase/client";
+import { bewaarDemoSleutel, lijktOpSleutel, spraakStatus, type SpraakStatus } from "@/lib/inlezen";
 import { TALEN, t, type Taal } from "@/lib/i18n";
 import { tr } from "@/lib/i18n/rijk";
 import { WERKVORMEN } from "@/lib/labels";
@@ -112,6 +115,7 @@ export default function BeheerPagina() {
       <Talen concept={concept} wijzig={wijzig} />
       <Werkvormen concept={concept} wijzig={wijzig} />
       <Tips concept={concept} wijzig={wijzig} />
+      <Spraak />
       {firebaseConfigured && <ToegangBlok concept={concept} wijzig={wijzig} />}
 
       {/* Bewaren blijft altijd in beeld: de pagina is lang. */}
@@ -563,6 +567,171 @@ function Tips({ concept, wijzig }: BlokProps) {
             </div>
           </div>
         ))}
+      </div>
+    </Blok>
+  );
+}
+
+/* ── Spraak: de sleutel van OpenAI ─────────────────────────────────────── */
+
+/*
+ * Staat los van "Bewaren" onderaan: een sleutel hoort niet in het gewone instellingen-
+ * document, want dat kan iedereen lezen. Met Firebase gaat hij naar geheimen/openai, dat
+ * alleen de server kan lezen; in demomodus blijft hij in deze browser.
+ */
+function Spraak() {
+  const [stand, setStand] = useState<SpraakStatus | null>(null);
+  const [invoer, setInvoer] = useState("");
+  const [bezig, setBezig] = useState(false);
+  const [melding, setMelding] = useState<{ soort: "ok" | "fout"; tekst: string } | null>(null);
+
+  useEffect(() => {
+    void spraakStatus(true).then(setStand);
+  }, []);
+
+  const ververs = async () => setStand(await spraakStatus(true));
+
+  const bewaar = async () => {
+    setMelding(null);
+    const sleutel = invoer.trim();
+    if (!lijktOpSleutel(sleutel)) {
+      setMelding({ soort: "fout", tekst: t("beheer.spraak.ongeldig") });
+      return;
+    }
+    setBezig(true);
+    try {
+      if (firebaseConfigured) await setDoc(doc(getDb(), "geheimen", "openai"), { sleutel });
+      else bewaarDemoSleutel(sleutel);
+      setInvoer("");
+      setMelding({
+        soort: "ok",
+        tekst: firebaseConfigured ? t("beheer.spraak.bewaard") : t("beheer.spraak.bewaardDemo"),
+      });
+      await ververs();
+    } catch (e) {
+      console.error("Sleutel bewaren mislukt", e);
+      setMelding({ soort: "fout", tekst: t("beheer.spraak.mislukt") });
+    } finally {
+      setBezig(false);
+    }
+  };
+
+  const verwijder = async () => {
+    setMelding(null);
+    setBezig(true);
+    try {
+      if (firebaseConfigured) await deleteDoc(doc(getDb(), "geheimen", "openai"));
+      else bewaarDemoSleutel(null);
+      setMelding({ soort: "ok", tekst: t("beheer.spraak.verwijderd") });
+      await ververs();
+    } catch (e) {
+      console.error("Sleutel verwijderen mislukt", e);
+      setMelding({ soort: "fout", tekst: t("beheer.spraak.mislukt") });
+    } finally {
+      setBezig(false);
+    }
+  };
+
+  const statusTekst = !stand
+    ? t("beheer.spraak.laden")
+    : stand.bron === "beheer"
+      ? t("beheer.spraak.statusBeheer")
+      : stand.bron === "omgeving"
+        ? t("beheer.spraak.statusOmgeving")
+        : stand.bron === "browser"
+          ? t("beheer.spraak.statusBrowser")
+          : t("beheer.spraak.statusGeen");
+  const eigenSleutel = stand?.bron === "beheer" || stand?.bron === "browser";
+
+  return (
+    <Blok icon={Mic} titel={t("beheer.spraak.titel")} uitleg={t("beheer.spraak.uitleg")}>
+      <div className="space-y-4">
+        <p
+          role="status"
+          className={`flex items-start gap-2 text-sm rounded-xl px-4 py-3 ${
+            stand?.bron ? "bg-emerald-50 text-emerald-900" : "bg-slate-50 text-slate-700"
+          }`}
+        >
+          {stand?.bron ? (
+            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" aria-hidden />
+          ) : (
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden />
+          )}
+          <span>{statusTekst}</span>
+        </p>
+
+        {firebaseConfigured && stand && !stand.serverToegang && (
+          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            {t("beheer.spraak.geenServertoegang")}
+          </p>
+        )}
+
+        <div>
+          <label htmlFor="openai-sleutel" className="block text-sm font-bold text-slate-800 mb-1">
+            {t("beheer.spraak.sleutel")}
+          </label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              id="openai-sleutel"
+              aria-describedby="openai-sleutel-hint"
+              type="password"
+              value={invoer}
+              onChange={(e) => {
+                setInvoer(e.target.value);
+                setMelding(null);
+              }}
+              placeholder="sk-..."
+              autoComplete="off"
+              spellCheck={false}
+              className={`${veldKlasse} font-mono`}
+            />
+            <button
+              onClick={bewaar}
+              disabled={bezig || !invoer.trim()}
+              className="shrink-0 px-4 py-2.5 rounded-xl bg-merk-800 hover:bg-merk-900 disabled:opacity-50 text-white font-bold text-sm transition-colors"
+            >
+              {t("beheer.spraak.bewaren")}
+            </button>
+          </div>
+          <p id="openai-sleutel-hint" className="text-xs text-slate-500 mt-1">
+            {tr("beheer.spraak.sleutelHint", {
+              link: (s) => (
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-semibold text-merk-900 underline"
+                >
+                  {s}
+                </a>
+              ),
+            })}
+          </p>
+        </div>
+
+        {melding && (
+          <p
+            role={melding.soort === "fout" ? "alert" : "status"}
+            className={`text-xs font-semibold ${melding.soort === "ok" ? "text-emerald-800" : "text-rose-800"}`}
+          >
+            {melding.tekst}
+          </p>
+        )}
+
+        {eigenSleutel && (
+          <button
+            onClick={verwijder}
+            disabled={bezig}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-rose-700 disabled:opacity-50"
+          >
+            <Trash2 className="w-3.5 h-3.5" aria-hidden />
+            {t("beheer.spraak.verwijderen")}
+          </button>
+        )}
+
+        <p className="text-xs text-slate-600 bg-slate-50 rounded-xl px-4 py-3">
+          {firebaseConfigured ? t("beheer.spraak.firebaseUitleg") : t("beheer.spraak.demoUitleg")}
+        </p>
       </div>
     </Blok>
   );

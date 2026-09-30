@@ -30,12 +30,34 @@ verdwijnt uit de menu's, het maakscherm, de bibliotheek en de live-activiteiten.
 materiaal blijft bewaard; wie het opent, ziet dat het niet beschikbaar is. Zet je het weer
 aan, dan is alles terug. De quizwedstrijd werkt alleen als de eenvoudige quiz aan staat.
 
+De groep **Spraak (OpenAI)** bevat *Inlezen* (een knop bij lezen, invulzinnen en zinnen
+bouwen) en de klastool *Audio naar tekst*. Ze verschijnen pas als er ook een sleutel is, zie
+hieronder.
+
 ## Didactische tips
 
 - **Tips voor leraren:** bij het maken van materiaal, in de klas, en de uitleg bij elke
   lesfase.
 - **Studeertips voor cursisten:** op de startpagina, bij het oefenen en de pagina *Slim
   oefenen*.
+
+## Spraak
+
+Inlezen en Audio naar tekst gebruiken Whisper van OpenAI. Maak op
+<https://platform.openai.com/api-keys> een sleutel aan en vul hem in. De kosten gaan naar die
+rekening, ongeveer 0,006 dollar per minuut opname.
+
+- **Met Firebase** gaat de sleutel naar `geheimen/openai` in Firestore. Een beheerder kan hem
+  zetten en wissen, maar niemand kan hem via de app teruglezen: alleen de server leest hem,
+  met `firebase-admin`. Op Firebase App Hosting werkt dat zonder extra instellingen; op een
+  andere host zet je een serviceaccount in `FIREBASE_SERVICE_ACCOUNT` (zie
+  [INSTALLEREN.md](INSTALLEREN.md#7-spraak-optioneel)).
+- **Liever geen sleutel in Firestore?** Zet hem in de omgevingsvariabele `OPENAI_API_KEY`. Een
+  sleutel in het beheer gaat daar boven.
+- **In demomodus** blijft de sleutel in de browser van wie hem invult. Hij gaat bij elke
+  opname mee naar de server, die hem doorgeeft aan OpenAI en niet bewaart.
+
+Alleen leraren kunnen inlezen. De opname wordt nergens bewaard.
 
 ## Toegang
 

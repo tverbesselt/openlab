@@ -5,12 +5,19 @@ import { useSearchParams } from "next/navigation";
 import { ClassroomTimer } from "@/components/tools/ClassroomTimer";
 import { StudentRandomizer } from "@/components/tools/StudentRandomizer";
 import { GroupGenerator } from "@/components/tools/GroupGenerator";
+import { AudioNaarTekst } from "@/components/tools/AudioNaarTekst";
 import { KLASTOOLS } from "@/lib/labels";
 import { useInstellingen } from "@/lib/instellingen/AppProvider";
 import { Uitgeschakeld } from "@/components/Uitgeschakeld";
 import { t } from "@/lib/i18n";
 
-type ToolId = "timer" | "randomizer" | "groups";
+type ToolId = "timer" | "randomizer" | "groups" | "audiotekst";
+
+const KOLOMMEN: Record<number, string> = {
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-4",
+};
 
 function KlastoolsInhoud() {
   const searchParams = useSearchParams();
@@ -42,7 +49,7 @@ function KlastoolsInhoud() {
         </p>
       </div>
 
-      <div className={`grid gap-2 ${tools.length === 3 ? "grid-cols-3" : tools.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+      <div className={`grid gap-2 ${KOLOMMEN[tools.length] ?? "grid-cols-1"}`}>
         {tools.map((tool) => {
           const Icon = tool.icon;
           const isActief = actief === tool.id;
@@ -70,6 +77,7 @@ function KlastoolsInhoud() {
         {huidig?.id === "timer" && <ClassroomTimer />}
         {huidig?.id === "randomizer" && <StudentRandomizer />}
         {huidig?.id === "groups" && <GroupGenerator />}
+        {huidig?.id === "audiotekst" && <AudioNaarTekst />}
       </div>
     </div>
   );

@@ -181,6 +181,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    /* ── Geheimen: alleen schrijven, nooit lezen ───────────────────────── */
+
+    // De sleutel van OpenAI voor inlezen (Beheer > Spraak). Een beheerder mag hem zetten of
+    // wissen, maar niemand kan hem via de app teruglezen, ook de beheerder niet. Alleen de
+    // server leest hem, met firebase-admin, en die gaat niet langs deze regels.
+    match /geheimen/{id} {
+      allow read: if false;
+      allow create, update: if id == 'openai' && isBeheerder()
+        && request.resource.data.keys().hasOnly(['sleutel'])
+        && tekst(request.resource.data.sleutel, 300)
+        && request.resource.data.sleutel.matches('sk-[A-Za-z0-9_-]{20,}');
+      allow delete: if id == 'openai' && isBeheerder();
+    }
+
     /* ── Codes: van zes tekens naar een oefening of map ──────────────────── */
 
     match /codes/{code} {

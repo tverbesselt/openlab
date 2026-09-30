@@ -32,6 +32,7 @@ import { ShareModal } from "@/components/ShareModal";
 import { LeraarPoort } from "@/components/LeraarPoort";
 import { Studietip } from "@/components/Studietip";
 import { Veld, Foutmelding, FeedbackKiezer } from "@/components/maken/Velden";
+import { InleesKnop } from "@/components/maken/InleesKnop";
 import {
   ZinbouwenVorm,
   VolgordeVorm,
@@ -1042,6 +1043,8 @@ export default function MakenPagina() {
               className="w-full p-3 font-mono text-sm rounded-xl bg-white border border-veldrand text-slate-900 focus:border-merk-800 focus:ring-2 focus:ring-merk/40 focus:outline-none"
             />
           </Veld>
+
+          <InleesKnop taal={spraakTaal} huidig={invulZinnen} onTekst={setInvulZinnen} zinPerRegel />
 
           <p className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3">
             {tr("maken.invul.uitleg", { code: (s) => <span className="font-mono">{s}</span> })}

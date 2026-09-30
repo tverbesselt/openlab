@@ -17,6 +17,7 @@ import oefenen from "./oefenen";
 import materiaal from "./materiaal";
 import klas from "./klas";
 import tips from "./tips";
+import spraak from "./spraak";
 
 export const NAAMRUIMTES = {
   algemeen,
@@ -33,6 +34,7 @@ export const NAAMRUIMTES = {
   materiaal,
   klas,
   tips,
+  spraak,
 };
 
 type Ruimtes = typeof NAAMRUIMTES;

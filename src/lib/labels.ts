@@ -18,6 +18,7 @@ import {
   ListOrdered,
   Boxes,
   PenLine,
+  AudioLines,
   BookOpen,
   Repeat2,
   Calculator,
@@ -230,6 +231,19 @@ export const KLASTOOLS = [
   klastool("timer", "timer", "/klastools?tool=timer"),
   klastool("randomizer", "randomizer", "/klastools?tool=randomizer"),
   klastool("groups", "groupmaker", "/klastools?tool=groups"),
+  {
+    // Geen werkvorm: er komt geen oefening uit, alleen tekst om verder te gebruiken.
+    id: "audiotekst" as const,
+    href: "/klastools?tool=audiotekst",
+    icon: AudioLines as LucideIcon,
+    waar: "klas" as const,
+    get label() {
+      return t("werkvormen.leshulp.audiotekst.label");
+    },
+    get uitleg() {
+      return t("werkvormen.leshulp.audiotekst.uitleg");
+    },
+  },
 ];
 
 /**

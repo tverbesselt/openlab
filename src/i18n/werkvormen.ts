@@ -125,6 +125,10 @@ export default definieer({
       tool: { one: "{n} tool", other: "{n} tools" },
     },
     leshulp: {
+      audiotekst: {
+        label: "Audio naar tekst",
+        uitleg: "Praat, en wat je zegt verschijnt als tekst. Kopieer hem of gebruik hem in een oefening.",
+      },
       opfrissen: {
         label: "Opfrissen",
         uitleg: "Een paar vragen uit vorige lessen, groot op het digibord.",
@@ -269,6 +273,10 @@ export default definieer({
       tool: { one: "{n} tool", other: "{n} tools" },
     },
     leshulp: {
+      audiotekst: {
+        label: "Speech to text",
+        uitleg: "Talk, and what you say appears as text. Copy it or use it in an exercise.",
+      },
       opfrissen: {
         label: "Refresh",
         uitleg: "A few questions from earlier lessons, big on the interactive whiteboard.",
@@ -413,6 +421,10 @@ export default definieer({
       tool: { one: "{n} outil", other: "{n} outils" },
     },
     leshulp: {
+      audiotekst: {
+        label: "Audio en texte",
+        uitleg: "Parlez, et ce que vous dites apparaît en texte. Copiez-le ou utilisez-le dans un exercice.",
+      },
       opfrissen: {
         label: "Réviser",
         uitleg: "Quelques questions des leçons précédentes, en grand sur le tableau interactif.",
@@ -557,6 +569,10 @@ export default definieer({
       tool: { one: "{n} herramienta", other: "{n} herramientas" },
     },
     leshulp: {
+      audiotekst: {
+        label: "Audio a texto",
+        uitleg: "Habla y lo que dices aparece como texto. Cópialo o úsalo en un ejercicio.",
+      },
       opfrissen: {
         label: "Repasar",
         uitleg: "Unas preguntas de clases anteriores, en grande en la pizarra digital.",

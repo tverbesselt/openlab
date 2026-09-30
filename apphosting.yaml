@@ -1,6 +1,7 @@
 # Firebase App Hosting: build- en runtimeconfiguratie.
 # Geen geheimen nodig: de app praat vanuit de browser met Firestore; de bescherming zit in
-# firestore.rules. Vul de waarden in uit de Firebase-console (Projectinstellingen > Je apps).
+# firestore.rules. De sleutel van OpenAI voor inlezen vul je in via Beheer > Spraak; de server
+# leest hem met de identiteit van deze backend. Vul de waarden in uit de Firebase-console (Projectinstellingen > Je apps).
 # Zie docs/en/setup.md (Nederlands: docs/nl/INSTALLEREN.md).
 
 runConfig:

@@ -6,6 +6,7 @@ import { Exercise, QuizQuestion, Rekensoort } from "@/lib/types";
 import { leesProcedures, leesSorteerItems, leesWerkwoorden, leesZinnen } from "@/lib/invoer";
 import { REKENTYPES } from "@/lib/rekenen";
 import { Veld, Foutmelding, MaakKnop, Toelichting, FeedbackKiezer, INVOER, INVOER_MONO } from "./Velden";
+import { InleesKnop } from "./InleesKnop";
 import { t, tn } from "@/lib/i18n";
 import { tr } from "@/lib/i18n/rijk";
 
@@ -89,6 +90,8 @@ export function ZinbouwenVorm(p: VormProps) {
           className={INVOER_MONO}
         />
       </Veld>
+
+      <InleesKnop taal={p.spraakTaal} huidig={zinnen} onTekst={setZinnen} zinPerRegel />
 
       <Toelichting>
         {t("makenvormen.zinbouwen.toelichting")}{" "}
@@ -508,6 +511,8 @@ export function LezenVorm(p: VormProps) {
           className={INVOER}
         />
       </Veld>
+
+      <InleesKnop taal={p.spraakTaal} huidig={tekst} onTekst={setTekst} />
 
       {woorden > 0 && (
         <Toelichting>

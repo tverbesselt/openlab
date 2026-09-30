@@ -37,8 +37,11 @@ understanding, wrap up), not in tools. Background (Dutch):
 | Check understanding | Simple quiz (optional second attempt, photo/video/audio per question), reading with questions, open question with model answer, escape room |
 | Wrap up | Exit ticket with standard questions |
 | Live in class | Quick question (A–D), understanding meter, quiz competition (teams, podium), collaborative whiteboard |
-| Class tools | Timer, name picker, group maker, refresh round, whiteboard screen with learning goals |
+| Class tools | Timer, name picker, group maker, refresh round, whiteboard screen with learning goals, speech to text* |
 | For learners | Spaced repetition, printable worksheets and Cornell notes, study tips |
+
+\* Speech to text, and dictating texts into the reading, fill-in and sentence-building
+editors, use OpenAI's Whisper with your own OpenAI key (set in Administration).
 
 Learners join with a **six-character code or QR code**. They don't need an account to
 practise; with an account the app remembers which cards they already know.
@@ -57,6 +60,8 @@ Administrators get a settings page (`/beheer`):
 - **Feature flags:** switch every activity type and feature on or off. Switched-off items
   disappear from menus; existing material is kept.
 - **Teaching tips:** switch tips for teachers and study tips for learners on or off.
+- **Speech:** enter an OpenAI key to switch on dictation and speech to text. The key is
+  write-only: nobody can read it back through the app.
 - **Access:** which email domains sign in as teacher or learner.
 
 See [docs/en/administration.md](docs/en/administration.md).

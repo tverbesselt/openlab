@@ -65,6 +65,7 @@ export default definieer({
       live: "Live in de klas",
       klastools: "Klastools",
       cursist: "Voor cursisten",
+      spraak: "Spraak (OpenAI)",
     },
     functies: {
       snellevraag: {
@@ -99,6 +100,14 @@ export default definieer({
         label: "Afdrukken",
         uitleg: "Oefeningen en een Cornell-notitieblad op papier.",
       },
+      inlezen: {
+        label: "Inlezen",
+        uitleg: "Leraren spreken een tekst in bij lezen, invulzinnen en zinnen bouwen; Whisper schrijft hem uit.",
+      },
+      audiotekst: {
+        label: "Audio naar tekst",
+        uitleg: "Klastool: wat de leraar zegt, verschijnt bijna live als tekst.",
+      },
     },
     tips: {
       titel: "Didactische tips",
@@ -107,6 +116,27 @@ export default definieer({
       lerarenUitleg: "Bij het maken van oefeningen, in de klas, en de uitleg bij elke lesfase (waarom het werkt en wat je erbij zegt).",
       cursisten: "Studeertips voor cursisten",
       cursistenUitleg: "Op de startpagina, bij het oefenen en de pagina Slim oefenen.",
+    },
+    spraak: {
+      titel: "Spraak",
+      uitleg: "Inlezen en Audio naar tekst gebruiken Whisper van OpenAI. Daarvoor is een eigen sleutel van OpenAI nodig; de kosten gaan naar die rekening (ongeveer 0,006 dollar per minuut opname). Zonder sleutel blijven de knoppen weg.",
+      sleutel: "Sleutel van OpenAI",
+      sleutelHint: "Maak een sleutel aan op <link>platform.openai.com</link> (API keys). Hij begint met sk-.",
+      bewaren: "Sleutel bewaren",
+      verwijderen: "Sleutel verwijderen",
+      ongeldig: "Dit lijkt geen sleutel van OpenAI. Een sleutel begint met sk-.",
+      bewaard: "De sleutel is bewaard. Binnen een halve minuut kunnen leraren inlezen.",
+      bewaardDemo: "De sleutel is bewaard in deze browser. Inlezen werkt nu.",
+      verwijderd: "De sleutel is verwijderd.",
+      mislukt: "Dat is niet gelukt. Kijk je verbinding na en probeer opnieuw.",
+      laden: "Even kijken of er een sleutel is ...",
+      statusBeheer: "Er is een sleutel ingesteld in het beheer. Leraren kunnen inlezen.",
+      statusOmgeving: "De server gebruikt de sleutel uit OPENAI_API_KEY. Een sleutel hier gaat daar boven.",
+      statusBrowser: "Er staat een sleutel in deze browser. Inlezen werkt hier.",
+      statusGeen: "Er is nog geen sleutel. Inlezen en Audio naar tekst blijven verborgen.",
+      geenServertoegang: "Let op: de server kan de sleutel uit het beheer niet lezen. Op Firebase App Hosting werkt dat vanzelf; elders zet je een serviceaccount in FIREBASE_SERVICE_ACCOUNT. Zie de installatiehandleiding.",
+      demoUitleg: "Demomodus: de sleutel blijft alleen in deze browser en gaat bij elke opname mee naar de server, die hem doorgeeft aan OpenAI en niet bewaart.",
+      firebaseUitleg: "De sleutel gaat naar Firestore (geheimen/openai). Niemand kan hem daar via de app teruglezen, ook jij niet: alleen de server gebruikt hem.",
     },
     toegang: {
       titel: "Toegang",
@@ -185,6 +215,7 @@ export default definieer({
       live: "Live in class",
       klastools: "Class tools",
       cursist: "For learners",
+      spraak: "Speech (OpenAI)",
     },
     functies: {
       snellevraag: {
@@ -219,6 +250,14 @@ export default definieer({
         label: "Printing",
         uitleg: "Exercises and a Cornell notes sheet on paper.",
       },
+      inlezen: {
+        label: "Dictation",
+        uitleg: "Teachers speak a text for reading, fill-in sentences and sentence building; Whisper writes it down.",
+      },
+      audiotekst: {
+        label: "Speech to text",
+        uitleg: "Classroom tool: what the teacher says appears as text, almost live.",
+      },
     },
     tips: {
       titel: "Teaching tips",
@@ -227,6 +266,27 @@ export default definieer({
       lerarenUitleg: "When creating exercises, in class, and the explanation for each lesson phase (why it works and what to tell learners).",
       cursisten: "Study tips for learners",
       cursistenUitleg: "On the home page, while practising and on the Smart practice page.",
+    },
+    spraak: {
+      titel: "Speech",
+      uitleg: "Dictation and Speech to text use OpenAI's Whisper. That needs your own OpenAI key; costs go to that account (about 0.006 dollars per minute of recording). Without a key the buttons stay hidden.",
+      sleutel: "OpenAI key",
+      sleutelHint: "Create a key at <link>platform.openai.com</link> (API keys). It starts with sk-.",
+      bewaren: "Save key",
+      verwijderen: "Remove key",
+      ongeldig: "This doesn't look like an OpenAI key. A key starts with sk-.",
+      bewaard: "The key has been saved. Teachers can dictate within half a minute.",
+      bewaardDemo: "The key has been saved in this browser. Dictation works now.",
+      verwijderd: "The key has been removed.",
+      mislukt: "That didn't work. Check your connection and try again.",
+      laden: "Checking whether there is a key ...",
+      statusBeheer: "A key has been set in Administration. Teachers can dictate.",
+      statusOmgeving: "The server uses the key from OPENAI_API_KEY. A key set here takes priority.",
+      statusBrowser: "There is a key in this browser. Dictation works here.",
+      statusGeen: "There is no key yet. Dictation and Speech to text stay hidden.",
+      geenServertoegang: "Note: the server can't read the key from Administration. On Firebase App Hosting this works automatically; elsewhere, put a service account in FIREBASE_SERVICE_ACCOUNT. See the setup guide.",
+      demoUitleg: "Demo mode: the key stays in this browser only and is sent with each recording to the server, which passes it on to OpenAI and doesn't store it.",
+      firebaseUitleg: "The key goes to Firestore (geheimen/openai). Nobody can read it back through the app, not even you: only the server uses it.",
     },
     toegang: {
       titel: "Access",
@@ -305,6 +365,7 @@ export default definieer({
       live: "En direct en classe",
       klastools: "Outils de classe",
       cursist: "Pour les apprenants",
+      spraak: "Parole (OpenAI)",
     },
     functies: {
       snellevraag: {
@@ -339,6 +400,14 @@ export default definieer({
         label: "Impression",
         uitleg: "Exercices et feuille de notes Cornell sur papier.",
       },
+      inlezen: {
+        label: "Dictée",
+        uitleg: "Les enseignants dictent un texte pour la lecture, les phrases à compléter et les phrases à construire ; Whisper l'écrit.",
+      },
+      audiotekst: {
+        label: "Audio en texte",
+        uitleg: "Outil de classe : ce que dit l'enseignant apparaît en texte, presque en direct.",
+      },
     },
     tips: {
       titel: "Conseils pédagogiques",
@@ -347,6 +416,27 @@ export default definieer({
       lerarenUitleg: "Lors de la création d'exercices, en classe, et l'explication de chaque phase de la leçon (pourquoi ça marche et quoi dire aux apprenants).",
       cursisten: "Conseils d'étude pour les apprenants",
       cursistenUitleg: "Sur la page d'accueil, pendant l'entraînement et sur la page S'exercer malin.",
+    },
+    spraak: {
+      titel: "Parole",
+      uitleg: "La dictée et Audio en texte utilisent Whisper d'OpenAI. Il faut pour cela votre propre clé OpenAI ; les frais sont facturés sur ce compte (environ 0,006 dollar par minute d'enregistrement). Sans clé, les boutons restent masqués.",
+      sleutel: "Clé OpenAI",
+      sleutelHint: "Créez une clé sur <link>platform.openai.com</link> (API keys). Elle commence par sk-.",
+      bewaren: "Enregistrer la clé",
+      verwijderen: "Supprimer la clé",
+      ongeldig: "Cela ne ressemble pas à une clé OpenAI. Une clé commence par sk-.",
+      bewaard: "La clé est enregistrée. Les enseignants pourront dicter d'ici une demi-minute.",
+      bewaardDemo: "La clé est enregistrée dans ce navigateur. La dictée fonctionne maintenant.",
+      verwijderd: "La clé a été supprimée.",
+      mislukt: "Cela n'a pas fonctionné. Vérifiez votre connexion et réessayez.",
+      laden: "Vérification de la clé ...",
+      statusBeheer: "Une clé est définie dans l'administration. Les enseignants peuvent dicter.",
+      statusOmgeving: "Le serveur utilise la clé de OPENAI_API_KEY. Une clé saisie ici est prioritaire.",
+      statusBrowser: "Une clé est enregistrée dans ce navigateur. La dictée fonctionne ici.",
+      statusGeen: "Pas encore de clé. La dictée et Audio en texte restent masqués.",
+      geenServertoegang: "Attention : le serveur ne peut pas lire la clé de l'administration. Sur Firebase App Hosting, cela fonctionne automatiquement ; ailleurs, placez un compte de service dans FIREBASE_SERVICE_ACCOUNT. Voir le guide d'installation.",
+      demoUitleg: "Mode démo : la clé reste uniquement dans ce navigateur et accompagne chaque enregistrement vers le serveur, qui la transmet à OpenAI sans la conserver.",
+      firebaseUitleg: "La clé est enregistrée dans Firestore (geheimen/openai). Personne ne peut la relire via l'application, pas même vous : seul le serveur l'utilise.",
     },
     toegang: {
       titel: "Accès",
@@ -425,6 +515,7 @@ export default definieer({
       live: "En directo en clase",
       klastools: "Herramientas de clase",
       cursist: "Para estudiantes",
+      spraak: "Voz (OpenAI)",
     },
     functies: {
       snellevraag: {
@@ -459,6 +550,14 @@ export default definieer({
         label: "Imprimir",
         uitleg: "Ejercicios y una hoja de notas Cornell en papel.",
       },
+      inlezen: {
+        label: "Dictado",
+        uitleg: "Los docentes dictan un texto para lectura, frases para completar y construir frases; Whisper lo escribe.",
+      },
+      audiotekst: {
+        label: "Audio a texto",
+        uitleg: "Herramienta de clase: lo que dice el docente aparece como texto, casi en directo.",
+      },
     },
     tips: {
       titel: "Consejos didácticos",
@@ -467,6 +566,27 @@ export default definieer({
       lerarenUitleg: "Al crear ejercicios, en clase, y la explicación de cada fase de la clase (por qué funciona y qué decir a los estudiantes).",
       cursisten: "Consejos de estudio para estudiantes",
       cursistenUitleg: "En la página de inicio, al practicar y en la página Practicar con cabeza.",
+    },
+    spraak: {
+      titel: "Voz",
+      uitleg: "El dictado y Audio a texto usan Whisper de OpenAI. Para ello hace falta una clave propia de OpenAI; los costes van a esa cuenta (unos 0,006 dólares por minuto de grabación). Sin clave, los botones no aparecen.",
+      sleutel: "Clave de OpenAI",
+      sleutelHint: "Crea una clave en <link>platform.openai.com</link> (API keys). Empieza por sk-.",
+      bewaren: "Guardar clave",
+      verwijderen: "Eliminar clave",
+      ongeldig: "Esto no parece una clave de OpenAI. Una clave empieza por sk-.",
+      bewaard: "La clave se ha guardado. En medio minuto los docentes podrán dictar.",
+      bewaardDemo: "La clave se ha guardado en este navegador. El dictado ya funciona.",
+      verwijderd: "La clave se ha eliminado.",
+      mislukt: "No ha funcionado. Comprueba tu conexión e inténtalo de nuevo.",
+      laden: "Comprobando si hay una clave ...",
+      statusBeheer: "Hay una clave en la administración. Los docentes pueden dictar.",
+      statusOmgeving: "El servidor usa la clave de OPENAI_API_KEY. Una clave puesta aquí tiene prioridad.",
+      statusBrowser: "Hay una clave en este navegador. El dictado funciona aquí.",
+      statusGeen: "Todavía no hay clave. El dictado y Audio a texto siguen ocultos.",
+      geenServertoegang: "Atención: el servidor no puede leer la clave de la administración. En Firebase App Hosting funciona automáticamente; en otros sitios, pon una cuenta de servicio en FIREBASE_SERVICE_ACCOUNT. Consulta la guía de instalación.",
+      demoUitleg: "Modo demo: la clave solo se queda en este navegador y se envía con cada grabación al servidor, que la pasa a OpenAI sin guardarla.",
+      firebaseUitleg: "La clave va a Firestore (geheimen/openai). Nadie puede volver a leerla desde la aplicación, ni siquiera tú: solo la usa el servidor.",
     },
     toegang: {
       titel: "Acceso",

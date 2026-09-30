@@ -68,3 +68,18 @@ firebase apphosting:backends:create
 
 Vul de waarden in `apphosting.yaml` in. `next.config.js` stuurt `/__/auth/*` door naar
 Firebase, zodat aanmelden via een redirect ook op mobiel werkt.
+
+## 7. Spraak (optioneel)
+
+Voor inlezen en audio naar tekst is een sleutel van OpenAI nodig. Die vul je in via
+**Beheer > Spraak**; de server leest hem uit Firestore met `firebase-admin`.
+
+- **Firebase App Hosting:** niets extra te doen, de server gebruikt de identiteit van de
+  backend.
+- **Andere host (Vercel, eigen server):** maak in de Google Cloud-console een serviceaccount
+  met de rol *Cloud Datastore User*, download de sleutel als JSON en zet de volledige inhoud
+  in `FIREBASE_SERVICE_ACCOUNT`.
+- **Zonder serviceaccount:** zet de sleutel van OpenAI in `OPENAI_API_KEY`.
+
+Vergeet niet de regels opnieuw te deployen (`firebase deploy --only firestore:rules`): ze
+bevatten de regel voor `geheimen/openai`.

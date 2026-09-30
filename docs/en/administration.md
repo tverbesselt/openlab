@@ -39,6 +39,8 @@ Every activity type and feature has its own switch, grouped by lesson phase:
 - Live in class: quick question, understanding meter, quiz competition, whiteboard
 - Class tools: timer, name picker, group maker, refresh round, whiteboard screen
 - For learners: spaced repetition, printing
+- Speech (OpenAI): dictation in the editors, speech to text (class tool). These only appear
+  once there is an OpenAI key, see below.
 
 What is switched off disappears from menus, the creation screen, the library and the lists
 of live activities. Existing material is kept; opening it shows "not available". Switch it on
@@ -53,6 +55,24 @@ default.
   explanation for each lesson phase (why it works, what to tell learners).
 - **Study tips for learners**: on the home page, while practising, and the *Smart practice*
   page.
+
+## Speech
+
+Dictation and Speech to text use OpenAI's Whisper. Create a key at
+<https://platform.openai.com/api-keys> and enter it. Costs go to that account, about
+0.006 dollars per minute of recording.
+
+- **With Firebase** the key is stored in `geheimen/openai`. Administrators can set and remove
+  it, but nobody can read it back through the app: only the server reads it, using
+  `firebase-admin`. On Firebase App Hosting this works without extra setup; on other hosts,
+  put a service account in `FIREBASE_SERVICE_ACCOUNT` (see
+  [setup.md](setup.md#8-speech-optional)).
+- **Rather not store the key in Firestore?** Set the `OPENAI_API_KEY` environment variable. A
+  key set in Administration takes priority.
+- **In demo mode** the key stays in the browser of whoever enters it. It is sent with each
+  recording to the server, which passes it on to OpenAI and does not store it.
+
+Only teachers can dictate. Recordings are not stored.
 
 ## Access (production only)
 

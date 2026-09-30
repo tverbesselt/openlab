@@ -19,13 +19,18 @@ start in het Engels: kies bovenaan *NL · Nederlands*.
   filmpje of audio), lezen met vragen, open vraag met modelantwoord, escaperoom, exit ticket.
 - **Live in de klas:** poll, woordwolk, snelle vraag, begripsmeter, quizwedstrijd,
   whiteboard. Cursisten doen mee met een code of QR-code, zonder account.
-- **Klastools:** klastimer, naamkiezer, groepenmaker, opfrissen, digibordscherm.
+- **Klastools:** klastimer, naamkiezer, groepenmaker, opfrissen, digibordscherm, audio naar
+  tekst.
+- **Inlezen:** leraren spreken teksten in bij lezen, invulzinnen en zinnen bouwen. Inlezen en
+  audio naar tekst gebruiken Whisper van OpenAI, met een eigen sleutel die je in het beheer
+  invult.
 - **Voor cursisten:** gespreid herhalen, afdrukken, studeertips.
 
 ## Eigen maken
 
 In **Beheer** stel je de naam, het logo en het kleurschema in, kies je welke talen
-beschikbaar zijn, zet je werkvormen en functies aan of uit, en ook de didactische tips. Zie
+beschikbaar zijn, zet je werkvormen en functies aan of uit, en ook de didactische tips. Een
+sleutel van OpenAI voor inlezen vul je er ook in. Zie
 [docs/nl/BEHEER.md](docs/nl/BEHEER.md).
 
 ## Snel starten

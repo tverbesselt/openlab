@@ -93,6 +93,20 @@ Any Next.js host works.
 `next.config.js` proxies `/__/auth/*` to Firebase so that redirect sign-in (the fallback on
 mobile) works on your own domain.
 
+## 8. Speech (optional)
+
+Dictation and speech to text need an OpenAI key. Enter it under **Administration > Speech**;
+the server reads it from Firestore with `firebase-admin`.
+
+- **Firebase App Hosting:** nothing to do, the server uses the backend's identity.
+- **Other hosts (Vercel, self-hosted):** create a service account with the *Cloud Datastore
+  User* role in the Google Cloud console, download its JSON key and put the whole content in
+  `FIREBASE_SERVICE_ACCOUNT`.
+- **Without a service account:** put the OpenAI key in `OPENAI_API_KEY` instead.
+
+Redeploy the rules (`firebase deploy --only firestore:rules`): they include the rule for
+`geheimen/openai`.
+
 ## Data model
 
 | Collection | Contents | Who reads | Who writes |
@@ -104,5 +118,6 @@ mobile) works on your own domain.
 | `codes/{code}` | Six-character share codes | anyone by code | teachers |
 | `sessies/{pin}` | Live sessions (+ `antwoorden`, `spelers`, `quizantwoorden`, `bord`) | anyone by PIN | host teacher |
 | `herhalingen/{uid}/items` | A learner's spaced-repetition schedule | only that learner | only that learner |
+| `geheimen/openai` | OpenAI key for dictation | nobody (server only) | administrators |
 
 Learner submissions (votes, exit tickets, quiz results) are anonymous and size-limited.
